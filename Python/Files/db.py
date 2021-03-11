@@ -1,6 +1,7 @@
 import sqlite3
 import datetime
 
+
 def add_db(lang, word, content):
     db = sqlite3.connect("../../Database/Words.db")
     cursor = db.cursor()
@@ -11,8 +12,11 @@ def add_db(lang, word, content):
     cursor.execute(insert_query)
     db.commit()
 
+
 def get_ran_word(lang):
     db = sqlite3.connect("../../Database/Words.db")
     cursor = db.cursor()
-    cursor.execute(f"SELECT Word, Content FROM Words Where Del=='0' and Type=='{lang}' Order by random()")
+    cursor.execute(
+        f"SELECT Word, Content FROM Words Where Del=='0' and Type=='{lang}' Order by random()"
+    )
     return cursor.fetchall()
