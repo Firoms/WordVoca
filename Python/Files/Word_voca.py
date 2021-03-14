@@ -9,7 +9,6 @@ from PIL import ImageTk
 from tkinter import *
 from tkinter import messagebox
 from db import *
-from gtts import gTTS
 from playsound import playsound
 
 python_path = os.path.join(os.getcwd())
@@ -75,7 +74,7 @@ class Gui:
             os.path.join(python_path, "../../images/see_A_btn.png"),
             530,
             450,
-            self.See_All_Screen,
+            lambda : self.See_All_Screen(1, ['Seq', True]),
         )
         Add_K_button = Get_label.image_button(
             self.gui,
@@ -217,31 +216,20 @@ class Gui:
             )
             if self.stop != lang:
                 break
-            tts1 = gTTS(text=self.cur[0], lang=lang)
-            try:
-                os.remove("word.mp3")
-            except:
-                pass
-            tts1.save("word.mp3")
-            playsound("word.mp3")
+            playsound(f"../../Sound/{self.cur[2]}_1.mp3")
             if self.stop != lang:
                 break
             time.sleep(1)
             if self.stop != lang:
                 break
-            tts2 = gTTS(text=self.cur[1], lang="ko")
-            try:
-                os.remove("content.mp3")
-            except:
-                pass
-            tts2.save("content.mp3")
-            playsound("content.mp3")
+            playsound(f"../../Sound/{self.cur[2]}_2.mp3")
             if self.stop != lang:
                 break
             time.sleep(1)
 
-    def See_All_Screen(self):
+    def See_All_Screen(self, page, sort):
         self.destroy()
+        word_num = get_word_num()
         see_A_Screen_background = Get_label.image_label(
             self.gui, os.path.join(python_path, "../../images/see_A_bg.png"), 0, 0
         )
@@ -257,21 +245,25 @@ class Gui:
             os.path.join(python_path, "../../images/left.png"),
             350,
             50,
-            self.no_action,
+            lambda: self.See_All_Screen(page-1, sort),
         )
+        if page==1:
+            left_button.config(state="disabled")
         right_button = Get_label.image_button(
             self.gui,
             os.path.join(python_path, "../../images/right.png"),
             450,
             50,
-            self.no_action,
+            lambda: self.See_All_Screen(page+1, sort),
         )
+        if word_num<=page*15:
+            right_button.config(state="disabled")
         self.Intro1 = Get_label.image_button_text(
             self.gui,
             os.path.join(python_path, "../../images/sa1-1.png"),
             19,
             140,
-            self.no_action,
+            lambda: self.See_All_Screen(1, ["Seq", True]),
             f"번호",
             "#472f91",
             ("고도 M", 12),
@@ -281,7 +273,7 @@ class Gui:
             os.path.join(python_path, "../../images/sa2-1.png"),
             78,
             140,
-            self.no_action,
+            lambda: self.See_All_Screen(1, ["Type", not sort[1]]),
             f"분류",
             "#472f91",
             ("고도 M", 12),
@@ -291,7 +283,7 @@ class Gui:
             os.path.join(python_path, "../../images/sa3-1.png"),
             170,
             140,
-            self.no_action,
+            lambda: self.See_All_Screen(1, ["Word", not sort[1]]),
             f"내용",
             "#472f91",
             ("고도 M", 12),
@@ -301,7 +293,7 @@ class Gui:
             os.path.join(python_path, "../../images/sa4-1.png"),
             397,
             140,
-            self.no_action,
+            lambda: self.See_All_Screen(1, ["Content", not sort[1]]),
             f"뜻",
             "#472f91",
             ("고도 M", 12),
@@ -311,64 +303,85 @@ class Gui:
             os.path.join(python_path, "../../images/sa5-1.png"),
             624,
             140,
-            self.no_action,
+            lambda: self.See_All_Screen(1, ["Date", not sort[1]]),
             f"등록일",
             "#472f91",
             ("고도 M", 12),
         )
-        for i in range(15):
+        data = get_all_words(sort)
+        data_num = word_num-(page-1)*15
+        if data_num>15:
+            data_num=15
+        del_btn_li = [i for i in range(data_num)]
+        for i in range(data_num):
+            data_index = (page-1)*15+i
             li1 = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../images/sa1-2.png"),
                 19,
                 185 + (40 * i),
-                f"{i+1}",
+                f"{data_index+1}",
                 "#472f91",
                 ("고도 M", 12),
             )
+            word_type =  data[data_index][1]
             li2 = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../images/sa2-2.png"),
                 78,
                 185 + (40 * i),
-                f" ",
+                f"{word_type}",
                 "#472f91",
                 ("고도 M", 12),
             )
+            word = data[data_index][2]
             li3 = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../images/sa3-2.png"),
                 170,
                 185 + (40 * i),
-                f" ",
+                f"{word}",
                 "#472f91",
                 ("고도 M", 12),
             )
+            content = data[data_index][3]
             li4 = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../images/sa4-2.png"),
                 397,
                 185 + (40 * i),
-                f" ",
+                f"{content}",
                 "#472f91",
                 ("고도 M", 12),
             )
+            date = data[data_index][4].split()[0]
             li5 = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../images/sa5-2.png"),
                 624,
                 185 + (40 * i),
-                f" ",
+                f"{date}",
                 "#472f91",
                 ("고도 M", 12),
             )
-            del_btn = Get_label.image_button(
+            seq = data[data_index][0]
+            self.make_del_btn(i,seq)
+            
+    def make_del_btn(self, i, seq):
+        Get_label.image_button(
                 self.gui,
                 os.path.join(python_path, "../../images/delete.png"),
                 753,
                 185 + (40 * i),
-                self.no_action,
+                lambda: self.delete_btn(seq) ,
             )
+
+    def delete_btn(self, seq):
+        print(seq)
+        answer = messagebox.askyesno("단어 삭제", "정말 단어를 삭제하시겠습니까?")
+        if answer == True:
+            delete_word(seq)
+            finish_message = tkinter.messagebox.showinfo("삭제 완료", "단어를 삭제했습니다.")
 
     def Add_ko_Screen(self):
         self.destroy()
