@@ -162,7 +162,7 @@ class Gui:
         )
         if not self.en_word_thread.is_alive():
             self.en_word_thread = threading.Thread(
-                target=lambda: self.repeat_word("en")
+                target=lambda: self.repeat_word("en", True)
             )
             self.en_word_thread.daemon = True
             self.en_word_thread.start()
@@ -174,7 +174,7 @@ class Gui:
                 190,
                 f"{self.cur[0]}",
                 "#0051C9",
-                ("1훈떡볶이 Regular", 50),
+                ("1훈떡볶이 Regular", 30),
             )
             word_label = Get_label.image_label_text(
                 self.gui,
@@ -183,10 +183,17 @@ class Gui:
                 480,
                 f"{self.cur[1]}",
                 "#0051C9",
-                ("1훈떡볶이 Regular", 50),
+                ("1훈떡볶이 Regular", 30),
             )
 
-    def repeat_word(self, lang):
+    def repeat_word(self, lang, rev):
+        # Reverse_button = Get_label.image_button(
+        #     self.gui,
+        #     os.path.join(python_path, "../../images/reverse_btn.png"),
+        #     500,
+        #     30,
+        #     lambda : self.repeat_word(lang, not rev),
+        # )
         words = get_ran_word(lang)
         if len(words) == 0:
             error_message = tkinter.messagebox.showinfo("단어 없음", "단어를 먼저 추가해주세요.")
@@ -196,33 +203,39 @@ class Gui:
             if len(words) == 0:
                 words = get_ran_word(lang)
             self.cur = words.pop()
+            if rev==True:
+                word1, word2 = self.cur[1], self.cur[0]
+                seq_num1, seq_num2 = 2, 1 
+            else:
+                word1, word2 = self.cur[0], self.cur[1]
+                seq_num1, seq_num2 = 1, 2 
             word_label = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../Images/word_bg.png"),
                 50,
                 190,
-                f"{self.cur[0]}",
+                f"{word1}",
                 "#0051C9",
-                ("1훈떡볶이 Regular", 50),
+                ("1훈떡볶이 Regular", 30),
             )
             word_label = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../Images/word_bg.png"),
                 50,
                 480,
-                f"{self.cur[1]}",
+                f"{word2}",
                 "#0051C9",
-                ("1훈떡볶이 Regular", 50),
+                ("1훈떡볶이 Regular", 30),
             )
             if self.stop != lang:
                 break
-            playsound(f"../../Sound/{self.cur[2]}_1.mp3")
+            playsound(f"../../Sound/{self.cur[2]}_{seq_num1}.mp3")
             if self.stop != lang:
                 break
             time.sleep(1)
             if self.stop != lang:
                 break
-            playsound(f"../../Sound/{self.cur[2]}_2.mp3")
+            playsound(f"../../Sound/{self.cur[2]}_{seq_num2}.mp3")
             if self.stop != lang:
                 break
             time.sleep(1)
@@ -368,7 +381,7 @@ class Gui:
             self.make_del_btn(i,seq)
             
     def make_del_btn(self, i, seq):
-        Get_label.image_button(
+        del_btn = Get_label.image_button(
                 self.gui,
                 os.path.join(python_path, "../../images/delete.png"),
                 753,
@@ -382,6 +395,8 @@ class Gui:
         if answer == True:
             delete_word(seq)
             finish_message = tkinter.messagebox.showinfo("삭제 완료", "단어를 삭제했습니다.")
+            self.See_All_Screen(1, ["Seq", True])
+
 
     def Add_ko_Screen(self):
         self.destroy()
@@ -431,7 +446,7 @@ class Gui:
         )
         if not self.ko_word_thread.is_alive():
             self.ko_word_thread = threading.Thread(
-                target=lambda: self.repeat_word("ko")
+                target=lambda: self.repeat_word("ko", True)
             )
             self.ko_word_thread.daemon = True
             self.ko_word_thread.start()
@@ -443,7 +458,7 @@ class Gui:
                 190,
                 f"{self.cur[0]}",
                 "#0051C9",
-                ("1훈떡볶이 Regular", 50),
+                ("1훈떡볶이 Regular", 30),
             )
             word_label = Get_label.image_label_text(
                 self.gui,
@@ -452,7 +467,7 @@ class Gui:
                 480,
                 f"{self.cur[1]}",
                 "#0051C9",
-                ("1훈떡볶이 Regular", 50),
+                ("1훈떡볶이 Regular", 30),
             )
 
 
