@@ -10,6 +10,7 @@ from tkinter import *
 from tkinter import messagebox
 from db import *
 from playsound import playsound
+import multiprocessing
 
 python_path = os.path.join(os.getcwd())
 
@@ -21,10 +22,9 @@ class Gui:
         self.gui.geometry("804x804")
         self.gui.resizable(width=False, height=False)
         execute_location = self.center_window(804, 804)
-        self.en_word_thread = threading.Thread(target=self.no_action)
-        self.en_word_thread.start()
-        self.ko_word_thread = threading.Thread(target=self.no_action)
-        self.ko_word_thread.start()
+        self.word_thread = threading.Thread(target=self.no_action)
+        self.word_thread.start()
+        self.num = 0
         self.Menu_Screen()
         self.gui.mainloop()
 
@@ -51,44 +51,44 @@ class Gui:
 
     def Menu_Screen(self):
         self.destroy()
-        self.stop = "no"
+        self.num += 1
         Menu_Screen_background = Get_label.image_label(
             self.gui, os.path.join(python_path, "../../images/menu_bg.png"), 0, 0
         )
-        Add_E_button = Get_label.image_button(
+        Add_en_button = Get_label.image_button(
             self.gui,
-            os.path.join(python_path, "../../images/add_E_btn.png"),
+            os.path.join(python_path, "../../images/add_en_btn.png"),
             20,
             450,
-            self.Add_en_Screen,
+            lambda : self.Add_Screen('en'),
         )
-        Li_E_button = Get_label.image_button(
+        Li_en_button = Get_label.image_button(
             self.gui,
-            os.path.join(python_path, "../../images/li_E_btn.png"),
+            os.path.join(python_path, "../../images/li_en_btn.png"),
             275,
             450,
-            self.Li_en_Screen,
+            lambda : self.Li_Screen('en'),
         )
         See_A_button = Get_label.image_button(
             self.gui,
             os.path.join(python_path, "../../images/see_A_btn.png"),
             530,
             450,
-            lambda : self.See_All_Screen(1, ['Seq', True]),
+            lambda: self.See_All_Screen(1, ["Seq", True]),
         )
-        Add_K_button = Get_label.image_button(
+        Add_ko_button = Get_label.image_button(
             self.gui,
-            os.path.join(python_path, "../../images/add_K_btn.png"),
+            os.path.join(python_path, "../../images/add_ko_btn.png"),
             20,
             600,
-            self.Add_ko_Screen,
+            lambda : self.Add_Screen('ko'),
         )
-        Li_K_button = Get_label.image_button(
+        Li_ko_button = Get_label.image_button(
             self.gui,
-            os.path.join(python_path, "../../images/li_K_btn.png"),
+            os.path.join(python_path, "../../images/li_ko_btn.png"),
             275,
             600,
-            self.Li_ko_Screen,
+            lambda : self.Li_Screen('ko'),
         )
         Exit_button = Get_label.image_button(
             self.gui,
@@ -98,10 +98,10 @@ class Gui:
             self.quit,
         )
 
-    def Add_en_Screen(self):
+    def Add_Screen(self, lang):
         self.destroy()
-        add_E_Screen_background = Get_label.image_label(
-            self.gui, os.path.join(python_path, "../../images/add_E_bg.png"), 0, 0
+        add_Screen_background = Get_label.image_label(
+            self.gui, os.path.join(python_path, f"../../images/add_{lang}_bg.png"), 0, 0
         )
         Return_button = Get_label.image_button(
             self.gui,
@@ -121,14 +121,14 @@ class Gui:
             os.path.join(python_path, "../../images/add.png"),
             200,
             700,
-            lambda: self.add_btn("en"),
+            lambda: self.add_btn(lang),
         )
         cancle_button = Get_label.image_button(
             self.gui,
             os.path.join(python_path, "../../images/cancle.png"),
             450,
             700,
-            self.Add_en_Screen,
+            lambda : self.Add_Screen(lang),
         )
 
     def add_btn(self, lang):
@@ -147,11 +147,10 @@ class Gui:
         else:
             self.Menu_Screen()
 
-    def Li_en_Screen(self):
+    def Li_Screen(self, lang):
         self.destroy()
-        self.stop = "en"
-        li_E_Screen_background = Get_label.image_label(
-            self.gui, os.path.join(python_path, "../../images/li_E_bg.png"), 0, 0
+        li_Screen_background = Get_label.image_label(
+            self.gui, os.path.join(python_path, f"../../images/li_{lang}_bg.png"), 0, 0
         )
         Return_button = Get_label.image_button(
             self.gui,
@@ -160,55 +159,49 @@ class Gui:
             30,
             self.Menu_Screen,
         )
-        if not self.en_word_thread.is_alive():
-            self.en_word_thread = threading.Thread(
-                target=lambda: self.repeat_word("en", True)
+        self.num += 1
+        self.word_thread = threading.Thread(
+            target=lambda: self.repeat_word(lang, True, self.num)
+        )
+        self.word_thread.daemon = True
+        self.word_thread.start()
+    
+    
+    def change_thread(self, lang, rev):
+        self.num +=1
+        self.word_thread = threading.Thread(
+                target=lambda: self.repeat_word(lang, rev, self.num)
             )
-            self.en_word_thread.daemon = True
-            self.en_word_thread.start()
-        else:
-            word_label = Get_label.image_label_text(
-                self.gui,
-                os.path.join(python_path, "../../Images/word_bg.png"),
-                50,
-                190,
-                f"{self.cur[0]}",
-                "#0051C9",
-                ("1훈떡볶이 Regular", 30),
-            )
-            word_label = Get_label.image_label_text(
-                self.gui,
-                os.path.join(python_path, "../../Images/word_bg.png"),
-                50,
-                480,
-                f"{self.cur[1]}",
-                "#0051C9",
-                ("1훈떡볶이 Regular", 30),
-            )
+        self.word_thread.daemon = True
+        self.word_thread.start()
 
-    def repeat_word(self, lang, rev):
-        # Reverse_button = Get_label.image_button(
-        #     self.gui,
-        #     os.path.join(python_path, "../../images/reverse_btn.png"),
-        #     500,
-        #     30,
-        #     lambda : self.repeat_word(lang, not rev),
-        # )
+
+
+    def repeat_word(self, lang, rev, num):
+        Reverse_button = Get_label.image_button(
+            self.gui,
+            os.path.join(python_path, "../../images/reverse_btn.png"),
+            500,
+            30,
+            lambda : self.change_thread(lang, not rev),
+        )
         words = get_ran_word(lang)
         if len(words) == 0:
             error_message = tkinter.messagebox.showinfo("단어 없음", "단어를 먼저 추가해주세요.")
             self.Menu_Screen()
             return
-        while self.stop == lang:
+        while self.num == num:
             if len(words) == 0:
                 words = get_ran_word(lang)
             self.cur = words.pop()
-            if rev==True:
+            if rev == True:
                 word1, word2 = self.cur[1], self.cur[0]
-                seq_num1, seq_num2 = 2, 1 
+                seq_num1, seq_num2 = 2, 1
             else:
                 word1, word2 = self.cur[0], self.cur[1]
-                seq_num1, seq_num2 = 1, 2 
+                seq_num1, seq_num2 = 1, 2
+            if self.num != num:
+                break
             word_label = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../Images/word_bg.png"),
@@ -227,17 +220,23 @@ class Gui:
                 "#0051C9",
                 ("1훈떡볶이 Regular", 30),
             )
-            if self.stop != lang:
+            if self.num != num:
                 break
-            playsound(f"../../Sound/{self.cur[2]}_{seq_num1}.mp3")
-            if self.stop != lang:
-                break
+            p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num1}.mp3",))
+            p.start()
+            while p.is_alive():
+                time.sleep(0.1)
+                if self.num!=num:
+                    p.terminate()
             time.sleep(1)
-            if self.stop != lang:
+            if self.num != num:
                 break
-            playsound(f"../../Sound/{self.cur[2]}_{seq_num2}.mp3")
-            if self.stop != lang:
-                break
+            p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num2}.mp3",))
+            p.start()
+            while p.is_alive():
+                time.sleep(0.1)
+                if self.num!=num:
+                    p.terminate()
             time.sleep(1)
 
     def See_All_Screen(self, page, sort):
@@ -258,18 +257,18 @@ class Gui:
             os.path.join(python_path, "../../images/left.png"),
             350,
             50,
-            lambda: self.See_All_Screen(page-1, sort),
+            lambda: self.See_All_Screen(page - 1, sort),
         )
-        if page==1:
+        if page == 1:
             left_button.config(state="disabled")
         right_button = Get_label.image_button(
             self.gui,
             os.path.join(python_path, "../../images/right.png"),
             450,
             50,
-            lambda: self.See_All_Screen(page+1, sort),
+            lambda: self.See_All_Screen(page + 1, sort),
         )
-        if word_num<=page*15:
+        if word_num <= page * 15:
             right_button.config(state="disabled")
         self.Intro1 = Get_label.image_button_text(
             self.gui,
@@ -322,12 +321,12 @@ class Gui:
             ("고도 M", 12),
         )
         data = get_all_words(sort)
-        data_num = word_num-(page-1)*15
-        if data_num>15:
-            data_num=15
+        data_num = word_num - (page - 1) * 15
+        if data_num > 15:
+            data_num = 15
         del_btn_li = [i for i in range(data_num)]
         for i in range(data_num):
-            data_index = (page-1)*15+i
+            data_index = (page - 1) * 15 + i
             li1 = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../images/sa1-2.png"),
@@ -337,7 +336,7 @@ class Gui:
                 "#472f91",
                 ("고도 M", 12),
             )
-            word_type =  data[data_index][1]
+            word_type = data[data_index][1]
             li2 = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../images/sa2-2.png"),
@@ -378,16 +377,16 @@ class Gui:
                 ("고도 M", 12),
             )
             seq = data[data_index][0]
-            self.make_del_btn(i,seq)
-            
+            self.make_del_btn(i, seq)
+
     def make_del_btn(self, i, seq):
         del_btn = Get_label.image_button(
-                self.gui,
-                os.path.join(python_path, "../../images/delete.png"),
-                753,
-                185 + (40 * i),
-                lambda: self.delete_btn(seq) ,
-            )
+            self.gui,
+            os.path.join(python_path, "../../images/delete.png"),
+            753,
+            185 + (40 * i),
+            lambda: self.delete_btn(seq),
+        )
 
     def delete_btn(self, seq):
         print(seq)
@@ -396,79 +395,6 @@ class Gui:
             delete_word(seq)
             finish_message = tkinter.messagebox.showinfo("삭제 완료", "단어를 삭제했습니다.")
             self.See_All_Screen(1, ["Seq", True])
-
-
-    def Add_ko_Screen(self):
-        self.destroy()
-        add_K_Screen_background = Get_label.image_label(
-            self.gui, os.path.join(python_path, "../../images/add_K_bg.png"), 0, 0
-        )
-        Return_button = Get_label.image_button(
-            self.gui,
-            os.path.join(python_path, "../../images/return_btn.png"),
-            590,
-            30,
-            self.Menu_Screen,
-        )
-        self.word_entry = tkinter.Text(self.gui, width=15, height=1)
-        self.word_entry.place(x=250, y=450)
-        self.word_entry.config(font=("고도 M", 45))
-        self.content_entry = tkinter.Text(self.gui, width=15, height=1)
-        self.content_entry.place(x=250, y=570)
-        self.content_entry.config(font=("고도 M", 45))
-        add_button = Get_label.image_button(
-            self.gui,
-            os.path.join(python_path, "../../images/add.png"),
-            200,
-            700,
-            lambda: self.add_btn("ko"),
-        )
-        cancle_button = Get_label.image_button(
-            self.gui,
-            os.path.join(python_path, "../../images/cancle.png"),
-            450,
-            700,
-            self.Add_ko_Screen,
-        )
-
-    def Li_ko_Screen(self):
-        self.destroy()
-        self.stop = "ko"
-        li_K_Screen_background = Get_label.image_label(
-            self.gui, os.path.join(python_path, "../../images/li_K_bg.png"), 0, 0
-        )
-        Return_button = Get_label.image_button(
-            self.gui,
-            os.path.join(python_path, "../../images/return_btn.png"),
-            590,
-            30,
-            self.Menu_Screen,
-        )
-        if not self.ko_word_thread.is_alive():
-            self.ko_word_thread = threading.Thread(
-                target=lambda: self.repeat_word("ko", True)
-            )
-            self.ko_word_thread.daemon = True
-            self.ko_word_thread.start()
-        else:
-            word_label = Get_label.image_label_text(
-                self.gui,
-                os.path.join(python_path, "../../Images/word_bg.png"),
-                50,
-                190,
-                f"{self.cur[0]}",
-                "#0051C9",
-                ("1훈떡볶이 Regular", 30),
-            )
-            word_label = Get_label.image_label_text(
-                self.gui,
-                os.path.join(python_path, "../../Images/word_bg.png"),
-                50,
-                480,
-                f"{self.cur[1]}",
-                "#0051C9",
-                ("1훈떡볶이 Regular", 30),
-            )
 
 
 if __name__ == "__main__":
