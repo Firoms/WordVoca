@@ -5,9 +5,9 @@ import pyglet
 import threading
 from Make_label import Get_label
 from playsound import playsound
-from PIL import ImageTk
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 from db import *
 from playsound import playsound
 import multiprocessing
@@ -140,12 +140,7 @@ class Gui:
         self.content = self.content.strip()
         add_db(lang, self.word, self.content)
         success_message = tkinter.messagebox.showinfo("추가 완료", "추가가 완료되었습니다.")
-        if lang == "en":
-            self.Add_en_Screen()
-        elif lang == "ko":
-            self.Add_ko_Screen()
-        else:
-            self.Menu_Screen()
+        self.Add_Screen(lang)
 
     def Li_Screen(self, lang):
         self.destroy()
@@ -159,20 +154,33 @@ class Gui:
             30,
             self.Menu_Screen,
         )
+        self.repeat1 = ttk.Combobox(self.gui, width = 5, height = 1, values=(' 1번',' 2번',' 3번',' 4번',' 5번'), state='readonly', font=("고도 M", 24))
+        self.repeat1.place(x=660, y=285)
+        self.repeat1.current(0)
+        self.sleep1 = ttk.Combobox(self.gui, width = 5, height = 1, values=('0.5초','1.0초','1.2초','1.5초','2.0초'), state='readonly', font=("고도 M", 24))
+        self.sleep1.place(x=660, y=400)
+        self.sleep1.current(1)
+        self.repeat2 = ttk.Combobox(self.gui, width = 5, height = 1, values=(' 1번',' 2번',' 3번',' 4번',' 5번'), state='readonly', font=("고도 M", 24))
+        self.repeat2.place(x=660, y=565)
+        self.repeat2.current(0)
+        self.repeat2.config(font=("고도 M", 24))
+        self.sleep2 = ttk.Combobox(self.gui, width = 5, height = 1, values=('0.5초','1.0초','1.2초','1.5초','2.0초'), state='readonly', font=("고도 M", 24))
+        self.sleep2.place(x=660, y=680)
+        self.sleep2.current(1)
         self.num += 1
         self.word_thread = threading.Thread(
-            target=lambda: self.repeat_word(lang, True, self.num)
+            target=lambda: self.repeat_word(lang, True, self.num),
+            daemon= True
         )
-        self.word_thread.daemon = True
         self.word_thread.start()
     
     
     def change_thread(self, lang, rev):
         self.num +=1
         self.word_thread = threading.Thread(
-                target=lambda: self.repeat_word(lang, rev, self.num)
+                target=lambda: self.repeat_word(lang, rev, self.num),
+                daemon=True
             )
-        self.word_thread.daemon = True
         self.word_thread.start()
 
 
@@ -206,7 +214,7 @@ class Gui:
                 self.gui,
                 os.path.join(python_path, "../../Images/word_bg.png"),
                 50,
-                190,
+                205,
                 f"{word1}",
                 "#0051C9",
                 ("1훈떡볶이 Regular", 30),
@@ -222,22 +230,26 @@ class Gui:
             )
             if self.num != num:
                 break
-            p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num1}.mp3",))
-            p.start()
-            while p.is_alive():
-                time.sleep(0.1)
-                if self.num!=num:
-                    p.terminate()
-            time.sleep(1)
-            if self.num != num:
-                break
-            p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num2}.mp3",))
-            p.start()
-            while p.is_alive():
-                time.sleep(0.1)
-                if self.num!=num:
-                    p.terminate()
-            time.sleep(1)
+            for _ in range(int(self.repeat1.get()[1])):
+                p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num1}.mp3",), daemon=True)
+                p.start()
+                while p.is_alive():
+                    time.sleep(0.1)
+                    if self.num!=num:
+                        p.terminate()
+                time.sleep(float(self.sleep1.get()[:3]))
+                if self.num != num:
+                    break
+            for _ in range(int(self.repeat2.get()[1])):
+                p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num2}.mp3",), daemon=True)
+                p.start()
+                while p.is_alive():
+                    time.sleep(0.1)
+                    if self.num!=num:
+                        p.terminate()
+                time.sleep(float(self.sleep2.get()[:3]))
+                if self.num != num:
+                    break
 
     def See_All_Screen(self, page, sort):
         self.destroy()
@@ -337,6 +349,10 @@ class Gui:
                 ("고도 M", 12),
             )
             word_type = data[data_index][1]
+            if word_type=='en':
+                word_type = 'ENG'
+            elif word_type=='ko':
+                word_type = 'KOR'
             li2 = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../images/sa2-2.png"),
@@ -346,7 +362,7 @@ class Gui:
                 "#472f91",
                 ("고도 M", 12),
             )
-            word = data[data_index][2]
+            word = data[data_index][2][:25]
             li3 = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../images/sa3-2.png"),
@@ -356,7 +372,7 @@ class Gui:
                 "#472f91",
                 ("고도 M", 12),
             )
-            content = data[data_index][3]
+            content = data[data_index][3][:15]
             li4 = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../images/sa4-2.png"),
