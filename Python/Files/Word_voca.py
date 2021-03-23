@@ -11,6 +11,7 @@ from tkinter import ttk
 from db import *
 from playsound import playsound
 import multiprocessing
+import pyglet
 
 python_path = os.path.join(os.getcwd())
 
@@ -21,7 +22,9 @@ class Gui:
         self.gui.title("Word Voca")
         self.gui.geometry("804x804")
         self.gui.resizable(width=False, height=False)
+        pyglet.font.add_file("../../Fonts/GodoM.otf")
         execute_location = self.center_window(804, 804)
+        self.gui.iconbitmap("../../Images/logo.ico")
         self.word_thread = threading.Thread(target=self.no_action)
         self.word_thread.start()
         self.num = 0
@@ -169,7 +172,7 @@ class Gui:
         self.sleep2.current(1)
         self.num += 1
         self.word_thread = threading.Thread(
-            target=lambda: self.repeat_word(lang, True, self.num),
+            target=lambda: self.repeat_word(lang, False, self.num),
             daemon= True
         )
         self.word_thread.start()
@@ -230,26 +233,29 @@ class Gui:
             )
             if self.num != num:
                 break
-            for _ in range(int(self.repeat1.get()[1])):
-                p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num1}.mp3",), daemon=True)
-                p.start()
-                while p.is_alive():
-                    time.sleep(0.1)
-                    if self.num!=num:
-                        p.terminate()
-                time.sleep(float(self.sleep1.get()[:3]))
-                if self.num != num:
-                    break
-            for _ in range(int(self.repeat2.get()[1])):
-                p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num2}.mp3",), daemon=True)
-                p.start()
-                while p.is_alive():
-                    time.sleep(0.1)
-                    if self.num!=num:
-                        p.terminate()
-                time.sleep(float(self.sleep2.get()[:3]))
-                if self.num != num:
-                    break
+            try:
+                for _ in range(int(self.repeat1.get()[1])):
+                    p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num1}.mp3",), daemon=True)
+                    p.start()
+                    while p.is_alive():
+                        time.sleep(0.1)
+                        if self.num!=num:
+                            p.terminate()
+                    time.sleep(float(self.sleep1.get()[:3]))
+                    if self.num != num:
+                        break
+                for _ in range(int(self.repeat2.get()[1])):
+                    p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num2}.mp3",), daemon=True)
+                    p.start()
+                    while p.is_alive():
+                        time.sleep(0.1)
+                        if self.num!=num:
+                            p.terminate()
+                    time.sleep(float(self.sleep2.get()[:3]))
+                    if self.num != num:
+                        break
+            except:
+                pass
 
     def See_All_Screen(self, page, sort):
         self.destroy()
