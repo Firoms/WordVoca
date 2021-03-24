@@ -23,6 +23,7 @@ class Gui:
         self.gui.geometry("804x804")
         self.gui.resizable(width=False, height=False)
         pyglet.font.add_file("../../Fonts/GodoM.otf")
+        pyglet.font.add_file("../../Fonts/HoonDdukbokki.ttf")
         execute_location = self.center_window(804, 804)
         self.gui.iconbitmap("../../Images/logo.ico")
         self.word_thread = threading.Thread(target=self.no_action)
