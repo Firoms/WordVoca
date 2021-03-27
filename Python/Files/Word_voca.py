@@ -64,14 +64,14 @@ class Gui:
             os.path.join(python_path, "../../images/add_en_btn.png"),
             20,
             450,
-            lambda : self.Add_Screen('en'),
+            lambda: self.Add_Screen("en"),
         )
         Li_en_button = Get_label.image_button(
             self.gui,
             os.path.join(python_path, "../../images/li_en_btn.png"),
             275,
             450,
-            lambda : self.Li_Screen('en'),
+            lambda: self.Li_Screen("en"),
         )
         See_A_button = Get_label.image_button(
             self.gui,
@@ -85,14 +85,14 @@ class Gui:
             os.path.join(python_path, "../../images/add_ko_btn.png"),
             20,
             600,
-            lambda : self.Add_Screen('ko'),
+            lambda: self.Add_Screen("ko"),
         )
         Li_ko_button = Get_label.image_button(
             self.gui,
             os.path.join(python_path, "../../images/li_ko_btn.png"),
             275,
             600,
-            lambda : self.Li_Screen('ko'),
+            lambda: self.Li_Screen("ko"),
         )
         Exit_button = Get_label.image_button(
             self.gui,
@@ -132,19 +132,22 @@ class Gui:
             os.path.join(python_path, "../../images/cancle.png"),
             450,
             700,
-            lambda : self.Add_Screen(lang),
+            lambda: self.Add_Screen(lang),
         )
 
     def add_btn(self, lang):
-        self.word_entry.config(state="disabled")
-        self.content_entry.config(state="disabled")
         self.word = self.word_entry.get("1.0", "end")
         self.word = self.word.strip()
         self.content = self.content_entry.get("1.0", "end")
         self.content = self.content.strip()
-        add_db(lang, self.word, self.content)
-        success_message = tkinter.messagebox.showinfo("추가 완료", "추가가 완료되었습니다.")
-        self.Add_Screen(lang)
+        if self.word and self.content:
+            self.word_entry.config(state="disabled")
+            self.content_entry.config(state="disabled")
+            add_db(lang, self.word, self.content)
+            success_message = tkinter.messagebox.showinfo("추가 완료", "추가가 완료되었습니다.")
+            self.Add_Screen(lang)
+        else:
+            failed_message = tkinter.messagebox.showinfo("입력 없음", "단어와 내용을 모두 입력해주세요.")
 
     def Li_Screen(self, lang):
         self.destroy()
@@ -158,36 +161,59 @@ class Gui:
             30,
             self.Menu_Screen,
         )
-        self.repeat1 = ttk.Combobox(self.gui, width = 5, height = 1, values=(' 1번',' 2번',' 3번',' 4번',' 5번'), state='readonly', font=("고도 M", 24))
+        self.repeat1 = ttk.Combobox(
+            self.gui,
+            width=5,
+            height=1,
+            values=(" 0번", " 1번", " 2번", " 3번", " 4번", " 5번"),
+            state="readonly",
+            font=("고도 M", 24),
+        )
         self.repeat1.place(x=660, y=285)
-        self.repeat1.current(0)
-        self.sleep1 = ttk.Combobox(self.gui, width = 5, height = 1, values=('0.5초','1.0초','1.2초','1.5초','2.0초'), state='readonly', font=("고도 M", 24))
+        self.repeat1.current(1)
+        self.sleep1 = ttk.Combobox(
+            self.gui,
+            width=5,
+            height=1,
+            values=("0.0초", "0.3초", "0.5초", "0.8초", "1.0초", "1.5초", "2.0초", "3.0초"),
+            state="readonly",
+            font=("고도 M", 24),
+        )
         self.sleep1.place(x=660, y=400)
-        self.sleep1.current(1)
-        self.repeat2 = ttk.Combobox(self.gui, width = 5, height = 1, values=(' 1번',' 2번',' 3번',' 4번',' 5번'), state='readonly', font=("고도 M", 24))
+        self.sleep1.current(2)
+        self.repeat2 = ttk.Combobox(
+            self.gui,
+            width=5,
+            height=1,
+            values=(" 0번", " 1번", " 2번", " 3번", " 4번", " 5번"),
+            state="readonly",
+            font=("고도 M", 24),
+        )
         self.repeat2.place(x=660, y=565)
-        self.repeat2.current(0)
+        self.repeat2.current(1)
         self.repeat2.config(font=("고도 M", 24))
-        self.sleep2 = ttk.Combobox(self.gui, width = 5, height = 1, values=('0.5초','1.0초','1.2초','1.5초','2.0초'), state='readonly', font=("고도 M", 24))
+        self.sleep2 = ttk.Combobox(
+            self.gui,
+            width=5,
+            height=1,
+            values=("0.0초", "0.3초", "0.5초", "0.8초", "1.0초", "1.5초", "2.0초", "3.0초"),
+            state="readonly",
+            font=("고도 M", 24),
+        )
         self.sleep2.place(x=660, y=680)
-        self.sleep2.current(1)
+        self.sleep2.current(2)
         self.num += 1
         self.word_thread = threading.Thread(
-            target=lambda: self.repeat_word(lang, False, self.num),
-            daemon= True
+            target=lambda: self.repeat_word(lang, False, self.num), daemon=True
         )
         self.word_thread.start()
-    
-    
+
     def change_thread(self, lang, rev):
-        self.num +=1
+        self.num += 1
         self.word_thread = threading.Thread(
-                target=lambda: self.repeat_word(lang, rev, self.num),
-                daemon=True
-            )
+            target=lambda: self.repeat_word(lang, rev, self.num), daemon=True
+        )
         self.word_thread.start()
-
-
 
     def repeat_word(self, lang, rev, num):
         Reverse_button = Get_label.image_button(
@@ -195,7 +221,7 @@ class Gui:
             os.path.join(python_path, "../../images/reverse_btn.png"),
             500,
             30,
-            lambda : self.change_thread(lang, not rev),
+            lambda: self.change_thread(lang, not rev),
         )
         words = get_ran_word(lang)
         if len(words) == 0:
@@ -214,7 +240,7 @@ class Gui:
                 seq_num1, seq_num2 = 1, 2
             if self.num != num:
                 break
-            word_label = Get_label.image_label_text(
+            word1_label = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../Images/word_bg.png"),
                 50,
@@ -223,7 +249,8 @@ class Gui:
                 "#0051C9",
                 ("1훈떡볶이 Regular", 30),
             )
-            word_label = Get_label.image_label_text(
+            word1_label.configure(wraplength='550')
+            word2_label = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../Images/word_bg.png"),
                 50,
@@ -232,25 +259,34 @@ class Gui:
                 "#0051C9",
                 ("1훈떡볶이 Regular", 30),
             )
+            word2_label.configure(wraplength='550')
             if self.num != num:
                 break
             try:
                 for _ in range(int(self.repeat1.get()[1])):
-                    p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num1}.mp3",), daemon=True)
+                    p = multiprocessing.Process(
+                        target=playsound,
+                        args=(f"../../Sound/{self.cur[2]}_{seq_num1}.mp3",),
+                        daemon=True,
+                    )
                     p.start()
                     while p.is_alive():
                         time.sleep(0.1)
-                        if self.num!=num:
+                        if self.num != num:
                             p.terminate()
                     time.sleep(float(self.sleep1.get()[:3]))
                     if self.num != num:
                         break
                 for _ in range(int(self.repeat2.get()[1])):
-                    p = multiprocessing.Process(target=playsound, args=(f"../../Sound/{self.cur[2]}_{seq_num2}.mp3",), daemon=True)
+                    p = multiprocessing.Process(
+                        target=playsound,
+                        args=(f"../../Sound/{self.cur[2]}_{seq_num2}.mp3",),
+                        daemon=True,
+                    )
                     p.start()
                     while p.is_alive():
                         time.sleep(0.1)
-                        if self.num!=num:
+                        if self.num != num:
                             p.terminate()
                     time.sleep(float(self.sleep2.get()[:3]))
                     if self.num != num:
@@ -356,10 +392,10 @@ class Gui:
                 ("고도 M", 12),
             )
             word_type = data[data_index][1]
-            if word_type=='en':
-                word_type = 'ENG'
-            elif word_type=='ko':
-                word_type = 'KOR'
+            if word_type == "en":
+                word_type = "ENG"
+            elif word_type == "ko":
+                word_type = "KOR"
             li2 = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../images/sa2-2.png"),
@@ -421,4 +457,5 @@ class Gui:
 
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     execute = Gui()
