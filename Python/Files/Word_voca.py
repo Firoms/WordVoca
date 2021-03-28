@@ -48,7 +48,7 @@ class Gui:
 
     def quit(self):
         answer = messagebox.askyesno("확인", "정말 종료하시겠습니까?")
-        if answer == True:
+        if answer:
             self.gui.quit()
             self.gui.destroy()
             exit()
@@ -59,6 +59,15 @@ class Gui:
         Menu_Screen_background = Get_label.image_label(
             self.gui, os.path.join(python_path, "../../images/menu_bg.png"), 0, 0
         )
+        Version_label = Label(
+            self.gui,
+            text="ver.2.0",
+            fg="yellow",
+            bg="purple",
+            font=("1훈떡볶이 Regular", 18),
+            height=1,
+        )
+        Version_label.place(x=720, y=10)
         Add_en_button = Get_label.image_button(
             self.gui,
             os.path.join(python_path, "../../images/add_en_btn.png"),
@@ -114,6 +123,13 @@ class Gui:
             30,
             self.Menu_Screen,
         )
+        add_excel_button = Get_label.image_button(
+            self.gui,
+            os.path.join(python_path, "../../images/add_excel.png"),
+            450,
+            30,
+            self.add_excel_btn,
+        )
         self.word_entry = tkinter.Text(self.gui, width=15, height=1)
         self.word_entry.place(x=250, y=450)
         self.word_entry.config(font=("고도 M", 45))
@@ -134,6 +150,17 @@ class Gui:
             700,
             lambda: self.Add_Screen(lang),
         )
+    def add_excel_btn(self):
+        answer = messagebox.askyesno("대량 추가", "어휘추가.xlsx에 있는 내용들을 대량으로 추가하시겠습니까?\n (이후에는 되돌릴 수 없습니다.)")
+        if answer:
+            try:
+                result, error = add_excel_file()
+            except:
+                error_message = tkinter.messagebox.showinfo("대량 추가 불가", f"Excel 파일을 읽어들일 수 없어 오류가 발생했습니다. \n 저장되었는지, Excel 파일을 닫았는지, 정확한 이름과 위치에 있는지 확인해주십시오.")
+                return
+            success_message = tkinter.messagebox.showinfo("추가 완료", f"{result[0]-4}번 {result[1]} {result[2]}까지 추가가 완료되었습니다.")
+            if error:
+                error_message = tkinter.messagebox.showinfo("내용 삭제 불가", f"Excel 파일이 실행되고 있어 Excel 파일의 내용을 삭제하지 못했습니다. \n 다음 대량 추가 시에 수동으로 삭제하고 입력해주세요.")
 
     def add_btn(self, lang):
         self.word = self.word_entry.get("1.0", "end")

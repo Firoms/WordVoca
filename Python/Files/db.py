@@ -1,6 +1,7 @@
 import sqlite3
 import datetime
 from gtts import gTTS
+from openpyxl import load_workbook, Workbook
 
 
 def add_db(lang, word, content):
@@ -53,3 +54,38 @@ def delete_word(seq):
     cursor = db.cursor()
     cursor.execute(f'UPDATE Words SET Del="True" Where Seq=={seq}')
     db.commit()
+
+
+def add_excel_file():
+    load_wb = load_workbook("../../어휘추가.xlsx", data_only=True)
+    load_ws = load_wb['Sheet1']
+    num = 4
+    excel_li = []
+    error = False
+    while True:
+        num += 1
+        word = load_ws[f'B{num}'].value
+        content = load_ws[f'C{num}'].value
+        lang = load_ws[f'D{num}'].value
+        if word and content:
+            if lang=='ENG':
+                add_db('en', word, content)
+            elif lang=='KOR':
+                add_db('ko', word, content)
+            excel_li.append([num, word, content, lang])
+        else:
+            # for i in range(2,5):
+            #     load_ws.cell(row=num, column=i).value = ''
+            #     load_wb.save("../../어휘추가.xlsx")
+            break
+        try:
+            for i in range(2,5):
+                load_ws.cell(row=num, column=i).value = ''
+            load_wb.save("../../어휘추가.xlsx")
+        except:
+            error = True
+    
+    return excel_li[-1], error
+
+if __name__ == "__main__":
+    add_excel_file()
