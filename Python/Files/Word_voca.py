@@ -150,17 +150,28 @@ class Gui:
             700,
             lambda: self.Add_Screen(lang),
         )
+
     def add_excel_btn(self):
-        answer = messagebox.askyesno("대량 추가", "어휘추가.xlsx에 있는 내용들을 대량으로 추가하시겠습니까?\n (이후에는 되돌릴 수 없습니다.)")
+        answer = messagebox.askyesno(
+            "대량 추가", "어휘추가.xlsx에 있는 내용들을 대량으로 추가하시겠습니까?\n (이후에는 되돌릴 수 없습니다.)"
+        )
         if answer:
             try:
                 result, error = add_excel_file()
             except:
-                error_message = tkinter.messagebox.showinfo("대량 추가 불가", f"Excel 파일을 읽어들일 수 없어 오류가 발생했습니다. \n 저장되었는지, Excel 파일을 닫았는지, 정확한 이름과 위치에 있는지 확인해주십시오.")
+                error_message = tkinter.messagebox.showinfo(
+                    "대량 추가 불가",
+                    f"Excel 파일을 읽어들일 수 없어 오류가 발생했습니다. \n 저장되었는지, Excel 파일을 닫았는지, 정확한 이름과 위치에 있는지 확인해주십시오.",
+                )
                 return
-            success_message = tkinter.messagebox.showinfo("추가 완료", f"{result[0]-4}번 {result[1]} {result[2]}까지 추가가 완료되었습니다.")
+            success_message = tkinter.messagebox.showinfo(
+                "추가 완료", f"{result[0]-4}번 {result[1]} {result[2]}까지 추가가 완료되었습니다."
+            )
             if error:
-                error_message = tkinter.messagebox.showinfo("내용 삭제 불가", f"Excel 파일이 실행되고 있어 Excel 파일의 내용을 삭제하지 못했습니다. \n 다음 대량 추가 시에 수동으로 삭제하고 입력해주세요.")
+                error_message = tkinter.messagebox.showinfo(
+                    "내용 삭제 불가",
+                    f"Excel 파일이 실행되고 있어 Excel 파일의 내용을 삭제하지 못했습니다. \n 다음 대량 추가 시에 수동으로 삭제하고 입력해주세요.",
+                )
 
     def add_btn(self, lang):
         self.word = self.word_entry.get("1.0", "end")
@@ -276,7 +287,7 @@ class Gui:
                 "#0051C9",
                 ("1훈떡볶이 Regular", 30),
             )
-            word1_label.configure(wraplength='550')
+            word1_label.configure(wraplength="550")
             word2_label = Get_label.image_label_text(
                 self.gui,
                 os.path.join(python_path, "../../Images/word_bg.png"),
@@ -286,7 +297,7 @@ class Gui:
                 "#0051C9",
                 ("1훈떡볶이 Regular", 30),
             )
-            word2_label.configure(wraplength='550')
+            word2_label.configure(wraplength="550")
             if self.num != num:
                 break
             try:
