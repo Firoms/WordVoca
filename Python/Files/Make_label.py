@@ -1,6 +1,6 @@
-from tkinter import *
 import tkinter
 import os
+from tkinter import *
 from PIL import ImageTk
 
 

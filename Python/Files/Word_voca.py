@@ -3,6 +3,7 @@ import time
 import os
 import pyglet
 import threading
+import multiprocessing
 from Make_label import Get_label
 from playsound import playsound
 from tkinter import *
@@ -10,8 +11,6 @@ from tkinter import messagebox
 from tkinter import ttk
 from db import *
 from playsound import playsound
-import multiprocessing
-import pyglet
 
 python_path = os.path.join(os.getcwd())
 
